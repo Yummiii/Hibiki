@@ -1,6 +1,9 @@
-use gstreamer::{prelude::{ElementExt, PadExt}, Element, Pad};
-use log::{error, info};
 use crate::streamer::ArcPipe;
+use gstreamer::{
+    prelude::{ElementExt, PadExt},
+    Element, Pad,
+};
+use log::{error, info};
 
 pub fn pad_added(src: &Element, pad: &Pad, pipeline: ArcPipe) {
     let new_pad_caps = pad.current_caps().unwrap();
@@ -13,10 +16,8 @@ pub fn pad_added(src: &Element, pad: &Pad, pipeline: ArcPipe) {
         _ => {
             error!("It has type {}", new_pad_type);
             None
-        },
+        }
     };
-
-    println!("{:?}", src);
 
     if let Some(sink_pad) = sink_pad {
         if !sink_pad.is_linked() {

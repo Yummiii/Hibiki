@@ -1,5 +1,5 @@
-use events::pad_added::pad_added;
-use gstreamer::{prelude::ElementExt, Message, State};
+use events::{end::eof, pad_added::pad_added};
+use gstreamer::prelude::ElementExt;
 use gtk4::prelude::ObjectExt;
 use pipeline::{create_pipeline, HibikiPipeline};
 use std::sync::Arc;
@@ -12,39 +12,35 @@ pub type ArcPipe = Arc<HibikiPipeline>;
 
 pub fn init_pipeline() -> ArcPipe {
     let pipeline = Arc::new(create_pipeline());
-    let pipeline_clone = pipeline.clone();
-    let pipeline_clone2 = pipeline.clone();
 
-    pipeline
-        .source
-        .connect_pad_added(move |src, pad| pad_added(src, pad, pipeline_clone.clone()));
+    pipeline.source.connect_pad_added({
+        let pipeline = pipeline.clone();
+        move |src, pad| pad_added(src, pad, pipeline.clone())
+    });
+
+    // pipeline.video.convert.connect("video-tags-changed", after, callback);
 
     let bus = pipeline.pipeline.bus().unwrap();
     bus.add_signal_watch();
 
-    //todo add handiling
-
-    // bus.connect("message::error", false, |a| {
-    //     println!("erro");
-    //     None
-    // });
-    bus.connect("message::eos", false, move |_| {
-        pipeline_clone2.pipeline.set_state(State::Null).unwrap();
-        println!("aa");
-        None
+    bus.connect("message::eos", false, {
+        let pipeline = pipeline.clone();
+        move |value| eof(value, pipeline.clone())
     });
-    bus.connect("message::state-changed", false, |a| {
-        let msg = &a[1].get::<Message>().unwrap();
 
-        println!("{:#?}", msg);
+    // bus.connect("message::state-changed", false, |a| {
+    //     let msg = &a[1].get::<Message>().unwrap();
 
-        None
-    });
-    // bus.connect("message::application", false, |a| {
-    //     println!("app");
+    //     println!("{:#?}", msg);
+
     //     None
     // });
 
+    bus.connect_message(None, |_, b| {
+        let a = b.view();
+
+        println!("{:#?}", a);
+    });
 
     pipeline
 }

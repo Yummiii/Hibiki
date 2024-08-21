@@ -1,6 +1,7 @@
 use crate::streamer::utils::macros::make;
 use audio::Audio;
-use gstreamer::{prelude::GstBinExtManual, Element, Pipeline};
+use gstreamer::{prelude::{GstBinExtManual, ElementExt}, Element, Pipeline, State};
+use gtk4::prelude::ObjectExt;
 use log::debug;
 use video::Video;
 
@@ -15,6 +16,14 @@ pub struct HibikiPipeline {
     pub video: Video,
 }
 
+impl HibikiPipeline {
+    pub fn play(&self, uri: &str) {
+        self.pipeline.set_state(State::Null).unwrap();
+        self.source.set_property("uri", uri);
+        self.pipeline.set_state(State::Playing).unwrap();
+    }
+}
+
 pub(super) fn create_pipeline() -> HibikiPipeline {
     let pipeline = HibikiPipeline {
         pipeline: Pipeline::with_name("hibiki-pipeline"),
@@ -23,13 +32,17 @@ pub(super) fn create_pipeline() -> HibikiPipeline {
         video: video::create_elements(),
     };
 
-    // there is probably a better way to do this
+    pipeline.source.set_property("message-forward", true);
 
-    let mut elements = [pipeline.audio.to_vec(), pipeline.video.to_vec()].concat();
+    let mut elements = vec![];
     elements.push(&pipeline.source);
+    elements.extend(pipeline.audio.to_vec());
+    elements.extend(pipeline.video.to_vec());
+
     pipeline.pipeline.add_many(&elements).unwrap();
     debug!("{} elements in pipeline", elements.len());
 
+    // Link the audio and video elements
     Element::link_many(pipeline.audio.to_vec()).unwrap();
     Element::link_many(pipeline.video.to_vec()).unwrap();
 

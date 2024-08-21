@@ -25,7 +25,9 @@ pub fn create_ui(pipeline: ArcPipe) -> Application {
         // ));
 
         let video = Picture::new();
-        video.set_paintable(Some(&pipeline.video.widget.property::<Paintable>("paintable")));
+        video.set_paintable(Some(
+            &pipeline.video.widget.property::<Paintable>("paintable"),
+        ));
         body.append(&video);
 
         body.set_vexpand(true);

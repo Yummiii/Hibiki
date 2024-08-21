@@ -13,6 +13,10 @@ impl Audio {
     pub fn to_vec(&self) -> Vec<&Element> {
         vec![&self.convert, &self.resample, &self.volume, &self.sink]
     }
+
+    pub fn set_volume(&self, volume: f64) {
+        self.volume.set_property("volume", volume);
+    }
 }
 
 pub fn create_elements() -> Audio {
@@ -24,7 +28,7 @@ pub fn create_elements() -> Audio {
         sink: make!("autoaudiosink").unwrap(),
     };
 
-    audio.volume.set_property("volume", 0.03);
+    audio.set_volume(0.03);
 
     audio
 }

@@ -1,12 +1,7 @@
 use crate::streamer::ArcPipe;
 use ashpd::desktop::file_chooser::{FileFilter, SelectedFiles};
-use gstreamer::{prelude::ElementExt, State};
-use gtk4::{
-    glib::MainContext,
-    prelude::{ButtonExt, ObjectExt},
-    Button,
-};
-use log::{debug, error};
+use gtk4::{glib::MainContext, prelude::ButtonExt, Button};
+use log::debug;
 
 pub fn build_picker(pipeline: ArcPipe) -> Button {
     let picker = Button::builder().icon_name("document-open").build();
@@ -30,12 +25,7 @@ pub fn build_picker(pipeline: ArcPipe) -> Button {
                     let uri = uri.as_str();
                     debug!("File: {}", uri);
 
-                    pipeline.source.set_property("uri", uri);
-
-                    pipeline.pipeline.set_state(State::Null).unwrap();
-                    if let Err(err) = pipeline.pipeline.set_state(State::Playing) {
-                        error!("Failed to start pipeline: {}", err);
-                    }
+                    pipeline.play(uri);
                 }
             }
         });
