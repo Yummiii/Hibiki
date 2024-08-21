@@ -1,11 +1,18 @@
+use crate::streamer::ArcPipe;
 use ashpd::desktop::file_chooser::{FileFilter, SelectedFiles};
-use gtk4::{glib::MainContext, prelude::ButtonExt, Button};
-use log::debug;
+use gstreamer::{prelude::ElementExt, State};
+use gtk4::{
+    glib::MainContext,
+    prelude::{ButtonExt, ObjectExt},
+    Button,
+};
+use log::{debug, error};
 
-pub fn build_picker() -> Button {
+pub fn build_picker(pipeline: ArcPipe) -> Button {
     let picker = Button::builder().icon_name("document-open").build();
+    picker.connect_clicked(move |_| {
+        let pipeline = pipeline.clone();
 
-    picker.connect_clicked(|_| {
         MainContext::default().spawn_local(async move {
             //todo: make this right
             let selected = SelectedFiles::open_file()
@@ -20,7 +27,15 @@ pub fn build_picker() -> Button {
 
             if let Ok(files) = selected.response() {
                 if let Some(uri) = files.uris().iter().next() {
-                    debug!("File: {}", uri.as_str());
+                    let uri = uri.as_str();
+                    debug!("File: {}", uri);
+
+                    pipeline.source.set_property("uri", uri);
+
+                    pipeline.pipeline.set_state(State::Null).unwrap();
+                    if let Err(err) = pipeline.pipeline.set_state(State::Playing) {
+                        error!("Failed to start pipeline: {}", err);
+                    }
                 }
             }
         });
