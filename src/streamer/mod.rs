@@ -13,10 +13,10 @@ pub type ArcPipe = Arc<HibikiPipeline>;
 pub fn init_pipeline() -> ArcPipe {
     let pipeline = Arc::new(create_pipeline());
 
-    pipeline.source.connect_pad_added({
-        let pipeline = pipeline.clone();
-        move |src, pad| pad_added(src, pad, pipeline.clone())
-    });
+    // pipeline.source.connect_pad_added({
+    //     let pipeline = pipeline.clone();
+    //     move |src, pad| pad_added(src, pad, pipeline.clone())
+    // });
 
     // pipeline.video.convert.connect("video-tags-changed", after, callback);
 

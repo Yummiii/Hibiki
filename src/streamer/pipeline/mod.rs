@@ -12,7 +12,7 @@ pub struct HibikiPipeline {
     pub pipeline: Pipeline,
     // is this the best way to store these?
     pub source: Element,
-    pub audio: Audio,
+    // pub audio: Audio,
     pub video: Video,
 }
 
@@ -27,24 +27,24 @@ impl HibikiPipeline {
 pub(super) fn create_pipeline() -> HibikiPipeline {
     let pipeline = HibikiPipeline {
         pipeline: Pipeline::with_name("hibiki-pipeline"),
-        source: make!("uridecodebin").unwrap(),
-        audio: audio::create_elements(),
+        source: make!("playbin3").unwrap(),
+        // audio: audio::create_elements(),
         video: video::create_elements(),
     };
 
-    pipeline.source.set_property("message-forward", true);
+    pipeline.source.set_property("video-sink", &pipeline.video.widget);
 
     let mut elements = vec![];
     elements.push(&pipeline.source);
-    elements.extend(pipeline.audio.to_vec());
-    elements.extend(pipeline.video.to_vec());
+    // elements.extend(pipeline.audio.to_vec());
+    // elements.extend(pipeline.video.to_vec());
 
     pipeline.pipeline.add_many(&elements).unwrap();
     debug!("{} elements in pipeline", elements.len());
 
     // Link the audio and video elements
-    Element::link_many(pipeline.audio.to_vec()).unwrap();
-    Element::link_many(pipeline.video.to_vec()).unwrap();
+    // Element::link_many(pipeline.audio.to_vec()).unwrap();
+    // Element::link_many([&pipeline.source, &pipeline.video.sink]).unwrap();
 
     pipeline
 }
