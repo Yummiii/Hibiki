@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 ashpd = { version = "0.9.1", features = ["gtk4"] }
+async-channel = "2.3.1"
 env_logger = "0.11.5"
 gstreamer = "0.23.0"
 gtk4 = "0.9.0"

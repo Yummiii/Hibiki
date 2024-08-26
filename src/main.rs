@@ -1,6 +1,6 @@
-use std::{env, path::Path};
 use gtk4::prelude::ApplicationExtManual;
 use log::debug;
+use std::{env, path::Path};
 use streamer::init_pipeline;
 use ui::create_ui;
 use url::Url;

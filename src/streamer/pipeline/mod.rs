@@ -1,50 +1,41 @@
 use crate::streamer::utils::macros::make;
-use audio::Audio;
-use gstreamer::{prelude::{GstBinExtManual, ElementExt}, Element, Pipeline, State};
+use async_channel::{unbounded, Receiver, Sender};
+use gstreamer::{prelude::ElementExt, Element, State};
 use gtk4::prelude::ObjectExt;
-use log::debug;
-use video::Video;
 
 mod audio;
 mod video;
 
 pub struct HibikiPipeline {
-    pub pipeline: Pipeline,
-    // is this the best way to store these?
-    pub source: Element,
-    // pub audio: Audio,
-    pub video: Video,
+    pub playbin: Element,
+    pub widget: Element,
+    pub receiver: Receiver<String>,
+    pub sender: Sender<String>,
 }
 
 impl HibikiPipeline {
     pub fn play(&self, uri: &str) {
-        self.pipeline.set_state(State::Null).unwrap();
-        self.source.set_property("uri", uri);
-        self.pipeline.set_state(State::Playing).unwrap();
+        self.playbin.set_state(State::Null).unwrap();
+        self.playbin.set_property("uri", uri);
+        self.playbin.set_state(State::Playing).unwrap();
     }
 }
 
 pub(super) fn create_pipeline() -> HibikiPipeline {
+    let (sender, receiver) = unbounded::<String>();
+
     let pipeline = HibikiPipeline {
-        pipeline: Pipeline::with_name("hibiki-pipeline"),
-        source: make!("playbin3").unwrap(),
-        // audio: audio::create_elements(),
-        video: video::create_elements(),
+        //maybe use playbin3 in the future?
+        playbin: make!("playbin").unwrap(),
+        widget: make!("gtk4paintablesink").unwrap(),
+        receiver,
+        sender,
     };
 
-    pipeline.source.set_property("video-sink", &pipeline.video.widget);
-
-    let mut elements = vec![];
-    elements.push(&pipeline.source);
-    // elements.extend(pipeline.audio.to_vec());
-    // elements.extend(pipeline.video.to_vec());
-
-    pipeline.pipeline.add_many(&elements).unwrap();
-    debug!("{} elements in pipeline", elements.len());
-
-    // Link the audio and video elements
-    // Element::link_many(pipeline.audio.to_vec()).unwrap();
-    // Element::link_many([&pipeline.source, &pipeline.video.sink]).unwrap();
+    pipeline
+        .playbin
+        .set_property("video-sink", &pipeline.widget);
+    pipeline.playbin.set_property("connection-speed", 56u64);
 
     pipeline
 }

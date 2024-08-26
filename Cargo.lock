@@ -965,6 +965,7 @@ name = "hibiki"
 version = "0.1.0"
 dependencies = [
  "ashpd",
+ "async-channel",
  "env_logger",
  "gstreamer",
  "gtk4",
