@@ -1,7 +1,10 @@
 use async_channel::{unbounded, Receiver, Sender};
-use log::error;
 use gtk4::glib::spawn_future_local;
-use std::{any::{type_name, Any}, process};
+use log::error;
+use std::{
+    any::{type_name, Any},
+    process,
+};
 
 pub struct Message {
     pub msg_type: MessageType,

@@ -5,12 +5,12 @@ use gstreamer::{
 };
 use gtk4::{
     glib::{property::PropertySet, timeout_add_local, ControlFlow, Propagation},
-    prelude::{ObjectExt, RangeExt, ScaleExt, WidgetExt},
+    prelude::{RangeExt, WidgetExt},
     Scale,
 };
 use std::{
     sync::{
-        atomic::{AtomicBool, AtomicU64, Ordering},
+        atomic::{AtomicU64, Ordering},
         Arc,
     },
     time::Duration,
@@ -37,7 +37,7 @@ pub fn build_time_bar(pipeline: ArcPipe) -> Scale {
         let time_bar = time_bar.clone();
 
         move |_, _, _value| {
-            // pipeline.playbin.set_state(State::Paused).unwrap();
+            pipeline.playbin.set_state(State::Paused).unwrap();
 
             let duration = duration.load(Ordering::Relaxed);
             let width = time_bar.width() as f64;
