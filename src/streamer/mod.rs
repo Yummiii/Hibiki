@@ -1,15 +1,14 @@
+use crate::messenger::MessageType;
 use events::end::eof;
 use gstreamer::{
-    prelude::{ElementExt, ElementExtManual, GstObjectExt, PadExt},
+    prelude::{ElementExt, ElementExtManual},
     tags::{AudioCodec, Bitrate, LanguageCode, VideoCodec},
-    ClockTime, Element, Fraction, Message, State, TagList,
+    ClockTime, Element, Message, State, TagList,
 };
 use gtk4::prelude::ObjectExt;
 use log::info;
 use pipeline::{create_pipeline, HibikiPipeline};
 use std::sync::Arc;
-
-use crate::messenger::{self};
 
 mod events;
 pub mod pipeline;
@@ -22,26 +21,6 @@ pub fn init_pipeline() -> ArcPipe {
 
     let bus = pipeline.playbin.bus().unwrap();
     bus.add_signal_watch();
-
-    pipeline.playbin.connect("element-setup", false, {
-        let pipeline = pipeline.clone();
-        move |msg| {
-            if let Ok(element) = msg[1].get::<gstreamer::Element>() {
-                let pipeline = pipeline.clone();
-                element.connect_pad_added(move |_, pad| {
-                    if let Some(caps) = pad.current_caps() {
-                        if let Some(structure) = caps.structure(0) {
-                            if let Ok(fps) = structure.get::<Fraction>("framerate") {
-                                // println!("FPS: {}/{}", fps.numer(), fps.denom());
-                                pipeline.messenger.send(messenger::Message::FpsFound(fps))
-                            }
-                        }
-                    }
-                });
-            }
-            None
-        }
-    });
 
     bus.connect("message::eos", false, {
         let pipeline = pipeline.clone();
@@ -62,7 +41,7 @@ pub fn init_pipeline() -> ArcPipe {
                     let a = pipeline.playbin.query_duration::<ClockTime>().unwrap();
                     pipeline
                         .messenger
-                        .send(messenger::Message::DurationFound(a.mseconds()));
+                        .send(MessageType::DurationFound, a.mseconds());
                 }
             }
             None

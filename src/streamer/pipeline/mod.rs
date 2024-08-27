@@ -3,12 +3,11 @@ use gstreamer::{prelude::ElementExt, Element, State};
 use gtk4::prelude::ObjectExt;
 
 pub mod audio;
-pub mod video;
 
 pub struct HibikiPipeline {
     pub playbin: Element,
     pub widget: Element,
-    pub messenger: Messenger
+    pub messenger: Messenger,
 }
 
 impl HibikiPipeline {
@@ -24,7 +23,7 @@ pub(super) fn create_pipeline() -> HibikiPipeline {
         //maybe use playbin3 in the future?
         playbin: make!("playbin").unwrap(),
         widget: make!("gtk4paintablesink").unwrap(),
-        messenger: Messenger::new()
+        messenger: Messenger::new(),
     };
 
     pipeline

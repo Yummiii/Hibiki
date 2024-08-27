@@ -5,9 +5,9 @@ use streamer::init_pipeline;
 use ui::create_ui;
 use url::Url;
 
+mod messenger;
 mod streamer;
 mod ui;
-mod messenger;
 
 fn main() {
     env_logger::init();
