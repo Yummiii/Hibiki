@@ -7,6 +7,7 @@ use url::Url;
 
 mod streamer;
 mod ui;
+mod messenger;
 
 fn main() {
     env_logger::init();

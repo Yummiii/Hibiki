@@ -1,16 +1,14 @@
-use crate::streamer::utils::macros::make;
-use async_channel::{unbounded, Receiver, Sender};
+use crate::{messenger::Messenger, streamer::utils::macros::make};
 use gstreamer::{prelude::ElementExt, Element, State};
 use gtk4::prelude::ObjectExt;
 
-mod audio;
-mod video;
+pub mod audio;
+pub mod video;
 
 pub struct HibikiPipeline {
     pub playbin: Element,
     pub widget: Element,
-    pub receiver: Receiver<String>,
-    pub sender: Sender<String>,
+    pub messenger: Messenger
 }
 
 impl HibikiPipeline {
@@ -22,20 +20,18 @@ impl HibikiPipeline {
 }
 
 pub(super) fn create_pipeline() -> HibikiPipeline {
-    let (sender, receiver) = unbounded::<String>();
-
     let pipeline = HibikiPipeline {
         //maybe use playbin3 in the future?
         playbin: make!("playbin").unwrap(),
         widget: make!("gtk4paintablesink").unwrap(),
-        receiver,
-        sender,
+        messenger: Messenger::new()
     };
 
     pipeline
         .playbin
         .set_property("video-sink", &pipeline.widget);
     pipeline.playbin.set_property("connection-speed", 56u64);
+    pipeline.playbin.set_property("message-forward", true);
 
     pipeline
 }
