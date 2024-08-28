@@ -1,5 +1,5 @@
 use crate::{messenger::Messenger, streamer::utils::macros::make};
-use gstreamer::{prelude::ElementExt, Element, State};
+use gstreamer::{prelude::{ElementExt, ElementExtManual}, Element, State};
 use gtk4::prelude::ObjectExt;
 
 pub mod audio;
@@ -15,6 +15,19 @@ impl HibikiPipeline {
         self.playbin.set_state(State::Null).unwrap();
         self.playbin.set_property("uri", uri);
         self.playbin.set_state(State::Playing).unwrap();
+    }
+
+    pub fn toggle(&self) {
+        let state = self.playbin.current_state();
+        match state {
+            State::Playing => {
+                self.playbin.set_state(State::Paused).unwrap();
+            }
+            State::Paused => {
+                self.playbin.set_state(State::Playing).unwrap();
+            }
+            _ => {}
+        }
     }
 }
 

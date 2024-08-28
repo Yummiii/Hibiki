@@ -1,4 +1,4 @@
-use crate::messenger::MessageType;
+use crate::messenger::types::MessageType;
 use events::end::eof;
 use gstreamer::{
     prelude::{ElementExt, ElementExtManual},
@@ -36,12 +36,14 @@ pub fn init_pipeline() -> ArcPipe {
                 let a = msg.structure().unwrap();
                 let state = a.get::<State>("new-state");
 
-                if let Ok(State::Playing) = state {
-                    analyze_streams(&pipeline.playbin);
-                    let a = pipeline.playbin.query_duration::<ClockTime>().unwrap();
-                    pipeline
-                        .messenger
-                        .send(MessageType::DurationFound, a.mseconds());
+                if let Ok(state) = state {
+                    pipeline.messenger.send(MessageType::StateChanged, state);
+
+                    if state == State::Playing {
+                        analyze_streams(&pipeline.playbin);
+                        let duration = pipeline.playbin.query_duration::<ClockTime>().unwrap();
+                        pipeline.messenger.send(MessageType::DurationFound, duration.mseconds());
+                    }
                 }
             }
             None
@@ -59,8 +61,6 @@ fn analyze_streams(playbin: &Element) {
 
     for i in 0..n_video {
         let tags = playbin.emit_by_name::<Option<TagList>>("get-video-tags", &[&i]);
-
-        println!("{:?}", tags);
 
         if let Some(tags) = tags {
             info!("video stream {i}:");
