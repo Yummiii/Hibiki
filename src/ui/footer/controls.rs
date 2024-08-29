@@ -1,11 +1,19 @@
-use crate::{messenger::{macros::on_message, types::MessageType}, streamer::ArcPipe};
+use crate::{
+    messenger::{macros::on_message, types::MessageType},
+    streamer::ArcPipe,
+};
 use gstreamer::State;
-use gtk4::{prelude::{BoxExt, ButtonExt}, Box, Button};
+use gtk4::{
+    prelude::{BoxExt, ButtonExt},
+    Box, Button,
+};
 
 pub fn build_controls(pipeline: ArcPipe) -> Box {
     let controls = Box::new(gtk4::Orientation::Horizontal, 0);
 
-    let play_button = Button::builder().icon_name("media-playback-pause-symbolic").build();
+    let play_button = Button::builder()
+        .icon_name("media-playback-pause-symbolic")
+        .build();
 
     play_button.connect_clicked({
         let pipeline = pipeline.clone();

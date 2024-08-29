@@ -29,13 +29,19 @@ impl Messenger {
     }
 
     pub fn send<T: Send + Sync + 'static>(&self, msg_type: MessageType, data: T) {
-        self.sender.send(Message {
-            msg_type,
-            data: Arc::new(data),
-        }).unwrap();
+        self.sender
+            .send(Message {
+                msg_type,
+                data: Arc::new(data),
+            })
+            .unwrap();
     }
 
-    pub fn on_message<T: Send + Sync + 'static, F: Fn(Arc<T>) + 'static>(&self, msg_type: MessageType, f: F) {
+    pub fn on_message<T: Send + Sync + 'static, F: Fn(Arc<T>) + 'static>(
+        &self,
+        msg_type: MessageType,
+        f: F,
+    ) {
         let mut rx = self.sender.subscribe();
 
         spawn_future_local({

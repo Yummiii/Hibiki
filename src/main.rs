@@ -1,4 +1,4 @@
-use gtk4::prelude::ApplicationExtManual;
+use gtk4::{gio::resources_register_include, prelude::ApplicationExtManual};
 use log::debug;
 use std::{env, path::Path};
 use streamer::init_pipeline;
@@ -11,6 +11,9 @@ mod ui;
 
 fn main() {
     env_logger::init();
+
+    resources_register_include!("compiled.gresource").unwrap();
+
     libadwaita::init().unwrap();
     gstreamer::init().unwrap();
 

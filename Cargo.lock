@@ -805,6 +805,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "glib-build-tools"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7029c2651d9b5d5a3eea93ec8a1995665c6d3a69ce9bf6042ad9064d134736d8"
+dependencies = [
+ "gio",
+]
+
+[[package]]
 name = "glib-macros"
 version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1011,12 +1020,14 @@ version = "0.1.0"
 dependencies = [
  "ashpd",
  "env_logger",
+ "glib-build-tools",
  "gstreamer",
  "gtk4",
  "libadwaita",
  "log",
  "tokio",
  "url",
+ "xdg",
 ]
 
 [[package]]
@@ -1875,6 +1886,12 @@ checksum = "68a9bda4691f099d435ad181000724da8e5899daa10713c2d432552b9ccd3a6f"
 dependencies = [
  "memchr",
 ]
+
+[[package]]
+name = "xdg"
+version = "2.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "213b7324336b53d2414b2db8537e56544d981803139155afa84f76eeebb7a546"
 
 [[package]]
 name = "xdg-home"

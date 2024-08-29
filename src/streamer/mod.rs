@@ -42,7 +42,9 @@ pub fn init_pipeline() -> ArcPipe {
                     if state == State::Playing {
                         analyze_streams(&pipeline.playbin);
                         let duration = pipeline.playbin.query_duration::<ClockTime>().unwrap();
-                        pipeline.messenger.send(MessageType::DurationFound, duration.mseconds());
+                        pipeline
+                            .messenger
+                            .send(MessageType::DurationFound, duration.mseconds());
                     }
                 }
             }

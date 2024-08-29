@@ -12,3 +12,7 @@ libadwaita = "0.7.0"
 log = "0.4.22"
 tokio = { version = "1.39.3", features = ["sync"] }
 url = "2.5.2"
+
+[build-dependencies]
+glib-build-tools = "0.20.0"
+xdg = "2.5.2"

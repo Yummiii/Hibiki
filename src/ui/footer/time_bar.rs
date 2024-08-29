@@ -21,6 +21,7 @@ use std::{
 
 pub fn build_time_bar(pipeline: ArcPipe) -> Scale {
     let time_bar = Scale::builder().hexpand(true).build();
+    time_bar.set_range(0., 100.);
 
     let duration = Arc::new(AtomicU64::new(0));
 
@@ -43,9 +44,6 @@ pub fn build_time_bar(pipeline: ArcPipe) -> Scale {
             let width = time_bar.width() as f64;
             let pos = (value / width) * duration as f64;
             let pos = ClockTime::from_mseconds(pos as u64);
-
-            println!("Pos: {}", pos);
-            println!("Duartion: {}", ClockTime::from_mseconds(duration));
 
             //this sometimes freezes the video, but i have no idea why
             //also todo: make all the player controls a trait in case i want to switch to a different player

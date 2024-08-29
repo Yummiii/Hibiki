@@ -1,5 +1,6 @@
-use crate::streamer::ArcPipe;
+use crate::{messenger::{macros::on_message, types::MessageType}, streamer::ArcPipe};
 use footer::build_footer;
+use gstreamer::State;
 use gtk4::{
     gdk::Paintable,
     prelude::{ApplicationExt, BoxExt, GtkWindowExt, ObjectExt, WidgetExt},
@@ -20,14 +21,22 @@ pub fn create_ui(pipeline: ArcPipe) -> Application {
         let content = Box::new(Orientation::Vertical, 0);
 
         let body = Box::new(Orientation::Vertical, 0);
-        // body.append(&Picture::for_filename(
-        //     "/home/yummi/Downloads/__hibiki_kantai_collection_drawn_by_kashimu__78b0dddec511252cfe47f242cc3649b9.png",
-        // ));
-
         let video = Picture::new();
-        video.set_paintable(Some(&pipeline.widget.property::<Paintable>("paintable")));
-        body.append(&video);
 
+        // video.set_visible(false);
+        video.set_paintable(Some(&pipeline.widget.property::<Paintable>("paintable")));
+        video.set_vexpand(true);
+
+        on_message!(pipeline.messenger, MessageType::StateChanged, State, {
+            let video = video.clone();
+            move |state| {
+                if *state == State::Playing && !video.is_visible() {
+                    video.set_visible(true);
+                }
+            }
+        });
+
+        body.append(&video);
         body.set_vexpand(true);
 
         content.append(&build_header(pipeline.clone()));

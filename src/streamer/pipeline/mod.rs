@@ -1,5 +1,8 @@
 use crate::{messenger::Messenger, streamer::utils::macros::make};
-use gstreamer::{prelude::{ElementExt, ElementExtManual}, Element, State};
+use gstreamer::{
+    prelude::{ElementExt, ElementExtManual},
+    Element, State,
+};
 use gtk4::prelude::ObjectExt;
 
 pub mod audio;
