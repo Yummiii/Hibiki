@@ -15,7 +15,7 @@ pub fn build_footer(pipeline: ArcPipe) -> ActionBar {
 
     btn.append(&build_controls(pipeline.clone()));
     btn.append(&build_time_bar(pipeline.clone()));
-    btn.append(&build_volume());
+    btn.append(&build_volume(pipeline.clone()));
 
     footer.set_center_widget(Some(&btn));
 

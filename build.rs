@@ -12,7 +12,7 @@ fn main() {
 
     #[cfg(target_os = "linux")]
     {
-        if option_env!("CREATE_FILES").unwrap_or("true") == "true" {
+        if option_env!("CREATE_FILES").unwrap_or("true") == "false" {
             let dirs = BaseDirectories::with_prefix(APP_ID).unwrap();
             let data = dirs.get_data_home();
             fs::create_dir_all(&data).unwrap();

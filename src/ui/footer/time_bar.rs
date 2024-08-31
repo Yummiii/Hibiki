@@ -38,6 +38,10 @@ pub fn build_time_bar(pipeline: ArcPipe) -> Scale {
         let time_bar = time_bar.clone();
 
         move |_, _, value| {
+            if pipeline.playbin.current_state() == State::Null {
+                return Propagation::Stop;
+            }
+
             pipeline.playbin.set_state(State::Paused).unwrap();
 
             let duration = duration.load(Ordering::Relaxed);

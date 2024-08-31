@@ -1,4 +1,7 @@
-use crate::{messenger::{macros::on_message, types::MessageType}, streamer::ArcPipe};
+use crate::{
+    messenger::{macros::on_message, types::MessageType},
+    streamer::ArcPipe,
+};
 use footer::build_footer;
 use gstreamer::State;
 use gtk4::{
