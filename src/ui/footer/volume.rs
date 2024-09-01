@@ -1,14 +1,16 @@
 use crate::{
     messenger::{macros::on_message, types::MessageType},
-    streamer::ArcPipe,
+    player::commons::{media_controls::MediaStates, Player},
+    state::ArcPipe,
 };
-use gstreamer::State;
 use gtk4::{
-    glib::{clone, Propagation}, prelude::{BoxExt, ButtonExt, PopoverExt, RangeExt, WidgetExt}, Box, Button, Entry, InputPurpose, Label, Orientation, Popover, Scale
+    glib::{clone, Propagation},
+    prelude::{BoxExt, ButtonExt, PopoverExt, RangeExt, WidgetExt},
+    Box, Button, Entry, InputPurpose, Label, Orientation, Popover, Scale,
 };
 use log::debug;
 
-pub fn build_volume(pipeline: ArcPipe) -> Button {
+pub fn build_volume(state: ArcPipe<impl Player>) -> Button {
     let menu = Button::builder()
         .icon_name("audio-volume-high-symbolic")
         .build();
@@ -35,21 +37,21 @@ pub fn build_volume(pipeline: ArcPipe) -> Button {
     //todo: make when the label is clicked, the entry is shown and the label is hidden
 
     on_message!(
-        pipeline.messenger,
+        state.messenger,
         MessageType::StateChanged,
-        State,
+        MediaStates,
         clone!(
             #[strong]
             label,
             #[strong]
             scale,
             #[strong]
-            pipeline,
+            state,
             move |state| {
-                if *state == State::Playing {
-                    let vol = pipeline.get_volume() * 100.;
-                    label.set_text(&format!("{:.1}%", vol));
-                    scale.set_value(vol)
+                if *state == MediaStates::Playing {
+                    // let vol = pipeline.get_volume() * 100.;
+                    // label.set_text(&format!("{:.1}%", vol));
+                    // scale.set_value(vol)
                 }
             }
         )
@@ -59,11 +61,11 @@ pub fn build_volume(pipeline: ArcPipe) -> Button {
         #[strong]
         label,
         #[strong]
-        pipeline,
+        state,
         move |_, _, value| {
             debug!("Volume: {}", value);
             label.set_text(&format!("{:.1}%", value));
-            pipeline.set_volume(value / 100.);
+            state.player.set_volume(value / 100.);
             Propagation::Proceed
         }
     ));

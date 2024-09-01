@@ -1,12 +1,12 @@
-use crate::streamer::ArcPipe;
+use crate::{player::commons::Player, state::ArcPipe};
 use ashpd::desktop::file_chooser::{FileFilter, SelectedFiles};
 use gtk4::{glib::MainContext, prelude::ButtonExt, Button};
 use log::debug;
 
-pub fn build_picker(pipeline: ArcPipe) -> Button {
+pub fn build_picker(state: ArcPipe<impl Player>) -> Button {
     let picker = Button::builder().icon_name("document-open").build();
     picker.connect_clicked(move |_| {
-        let pipeline = pipeline.clone();
+        let state = state.clone();
 
         MainContext::default().spawn_local(async move {
             //todo: make this right
@@ -25,7 +25,7 @@ pub fn build_picker(pipeline: ArcPipe) -> Button {
                     let uri = uri.as_str();
                     debug!("File: {}", uri);
 
-                    pipeline.play(uri);
+                    state.player.play(uri);
                 }
             }
         });

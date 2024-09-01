@@ -1,12 +1,11 @@
 use crate::{
     messenger::{macros::on_message, types::MessageType},
-    streamer::ArcPipe,
+    player::commons::{media_controls::MediaStates, Player},
+    state::ArcPipe,
 };
 use footer::build_footer;
-use gstreamer::State;
 use gtk4::{
-    gdk::Paintable,
-    prelude::{ApplicationExt, BoxExt, GtkWindowExt, ObjectExt, WidgetExt},
+    prelude::{ApplicationExt, BoxExt, GtkWindowExt, WidgetExt},
     Box, Orientation, Picture,
 };
 use header::build_header;
@@ -15,7 +14,7 @@ use libadwaita::{Application, ApplicationWindow};
 mod footer;
 mod header;
 
-pub fn create_ui(pipeline: ArcPipe) -> Application {
+pub fn create_ui(state: ArcPipe<impl Player>) -> Application {
     let app = Application::builder()
         .application_id("com.zuraaa.Hibiki")
         .build();
@@ -26,14 +25,14 @@ pub fn create_ui(pipeline: ArcPipe) -> Application {
         let body = Box::new(Orientation::Vertical, 0);
         let video = Picture::new();
 
-        // video.set_visible(false);
-        video.set_paintable(Some(&pipeline.widget.property::<Paintable>("paintable")));
+        state.player.set_widget(&video);
+
         video.set_vexpand(true);
 
-        on_message!(pipeline.messenger, MessageType::StateChanged, State, {
+        on_message!(state.messenger, MessageType::StateChanged, MediaStates, {
             let video = video.clone();
             move |state| {
-                if *state == State::Playing && !video.is_visible() {
+                if *state == MediaStates::Playing && !video.is_visible() {
                     video.set_visible(true);
                 }
             }
@@ -42,9 +41,9 @@ pub fn create_ui(pipeline: ArcPipe) -> Application {
         body.append(&video);
         body.set_vexpand(true);
 
-        content.append(&build_header(pipeline.clone()));
+        content.append(&build_header(state.clone()));
         content.append(&body);
-        content.append(&build_footer(pipeline.clone()));
+        content.append(&build_footer(state.clone()));
 
         let window = ApplicationWindow::builder()
             .application(app)

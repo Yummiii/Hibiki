@@ -1,4 +1,4 @@
-use crate::streamer::ArcPipe;
+use crate::{player::commons::Player, state::ArcPipe};
 use controls::build_controls;
 use gtk4::{prelude::BoxExt, ActionBar, Box, Orientation};
 use time_bar::build_time_bar;
@@ -8,7 +8,7 @@ mod controls;
 mod time_bar;
 mod volume;
 
-pub fn build_footer(pipeline: ArcPipe) -> ActionBar {
+pub fn build_footer(pipeline: ArcPipe<impl Player>) -> ActionBar {
     let footer = ActionBar::new();
 
     let btn = Box::new(Orientation::Horizontal, 0);
