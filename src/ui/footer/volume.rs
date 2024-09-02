@@ -5,12 +5,13 @@ use crate::{
 };
 use gtk4::{
     glib::{clone, Propagation},
-    prelude::{BoxExt, ButtonExt, PopoverExt, RangeExt, WidgetExt},
-    Box, Button, Entry, InputPurpose, Label, Orientation, Popover, Scale,
+    prelude::{ButtonExt, PopoverExt, RangeExt, ScaleExt, WidgetExt},
+    Button, Orientation, Popover, Scale,
 };
-use log::debug;
 
 pub fn build_volume(state: ArcPipe<impl Player>) -> Button {
+    //I want to add a way for the user to manually type the volume if they want to
+
     let menu = Button::builder()
         .icon_name("audio-volume-high-symbolic")
         .build();
@@ -18,23 +19,15 @@ pub fn build_volume(state: ArcPipe<impl Player>) -> Button {
     let popover = Popover::new();
     popover.set_position(gtk4::PositionType::Top);
     popover.set_parent(&menu);
-    popover.set_height_request(200);
-    popover.set_width_request(75);
-
-    let container = Box::builder().orientation(Orientation::Vertical).build();
+    popover.set_height_request(210);
 
     let scale = Scale::builder().orientation(Orientation::Vertical).build();
     scale.set_range(0., 100.);
     scale.set_inverted(true);
     scale.set_vexpand(true);
+    scale.set_draw_value(true);
 
-    let label = Label::new(Some(&scale.value().to_string()));
-    let entry = Entry::builder()
-        .input_purpose(InputPurpose::Number)
-        .visible(false)
-        .build();
-
-    //todo: make when the label is clicked, the entry is shown and the label is hidden
+    // scale.add_mark(50., gtk4::PositionType::Top, None);
 
     on_message!(
         state.messenger,
@@ -42,16 +35,13 @@ pub fn build_volume(state: ArcPipe<impl Player>) -> Button {
         MediaStates,
         clone!(
             #[strong]
-            label,
-            #[strong]
             scale,
             #[strong]
             state,
-            move |state| {
-                if *state == MediaStates::Playing {
-                    // let vol = pipeline.get_volume() * 100.;
-                    // label.set_text(&format!("{:.1}%", vol));
-                    // scale.set_value(vol)
+            move |media_state| {
+                if *media_state == MediaStates::Playing {
+                    let vol = state.player.volume() * 100.;
+                    scale.set_value(vol);
                 }
             }
         )
@@ -59,23 +49,16 @@ pub fn build_volume(state: ArcPipe<impl Player>) -> Button {
 
     scale.connect_change_value(clone!(
         #[strong]
-        label,
-        #[strong]
         state,
         move |_, _, value| {
-            debug!("Volume: {}", value);
-            label.set_text(&format!("{:.1}%", value));
             state.player.set_volume(value / 100.);
             Propagation::Proceed
         }
     ));
 
-    container.append(&label);
-    container.append(&entry);
-    container.append(&scale);
+    popover.set_child(Some(&scale));
 
-    popover.set_child(Some(&container));
-
+    //is this redundant?
     menu.connect_clicked(move |_| {
         if popover.is_visible() {
             popover.hide();

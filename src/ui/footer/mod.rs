@@ -8,16 +8,16 @@ mod controls;
 mod time_bar;
 mod volume;
 
-pub fn build_footer(pipeline: ArcPipe<impl Player>) -> ActionBar {
+pub fn build_footer(state: ArcPipe<impl Player>) -> ActionBar {
     let footer = ActionBar::new();
 
-    let btn = Box::new(Orientation::Horizontal, 0);
+    let container = Box::new(Orientation::Horizontal, 0);
 
-    btn.append(&build_controls(pipeline.clone()));
-    btn.append(&build_time_bar(pipeline.clone()));
-    btn.append(&build_volume(pipeline.clone()));
+    container.append(&build_controls(state.clone()));
+    container.append(&build_time_bar(state.clone()));
+    container.append(&build_volume(state.clone()));
 
-    footer.set_center_widget(Some(&btn));
+    footer.set_center_widget(Some(&container));
 
     footer
 }

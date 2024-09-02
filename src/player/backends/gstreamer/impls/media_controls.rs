@@ -4,7 +4,7 @@ use crate::player::{
 };
 use gstreamer::{
     prelude::{ElementExt, ElementExtManual},
-    ClockTime, State,
+    ClockTime, SeekFlags, State,
 };
 use gtk4::prelude::ObjectExt;
 
@@ -52,5 +52,15 @@ impl MediaControls for GStreamerPlayer {
     fn duration(&self) -> Option<u64> {
         let dur = self.playbin.query_duration::<ClockTime>();
         dur.map(|dur| dur.mseconds())
+    }
+
+    fn seek(&self, position: u64) -> Result<(), ()> {
+        //todo make error more descriptive
+        self.playbin
+            .seek_simple(
+                SeekFlags::TRICKMODE | SeekFlags::FLUSH,
+                ClockTime::from_mseconds(position),
+            )
+            .map_err(|_| ())
     }
 }

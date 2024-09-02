@@ -1,8 +1,12 @@
 use super::GStreamerPlayer;
-use crate::{messenger::types::MessageType, player::commons::media_controls::MediaControls};
-use gstreamer::{prelude::ElementExt, Message, State};
+use eos::eos;
+use gstreamer::prelude::ElementExt;
 use gtk4::prelude::ObjectExt;
+use state_changed::state_changed;
 use std::sync::Arc;
+
+mod eos;
+mod state_changed;
 
 pub fn connect_events(player: Arc<GStreamerPlayer>) {
     let bus = player.playbin.bus().unwrap();
@@ -10,22 +14,11 @@ pub fn connect_events(player: Arc<GStreamerPlayer>) {
 
     bus.connect("message::state-changed", false, {
         let player = player.clone();
+        move |msg| state_changed(msg, player.clone())
+    });
 
-        move |a| {
-            let msg = &a[1].get::<Message>().unwrap();
-
-            if msg.src().map(|s| *s == player.playbin).unwrap_or(false) {
-                let a = msg.structure().unwrap();
-                let state = a.get::<State>("new-state");
-
-                if state.is_ok() {
-                    //this is just a temporary fix, i'll make the conversor later
-                    player
-                        .messenger
-                        .send(MessageType::StateChanged, player.state());
-                }
-            }
-            None
-        }
+    bus.connect("message::eos", false, {
+        let player = player.clone();
+        move |msg| eos(msg, player.clone())
     });
 }

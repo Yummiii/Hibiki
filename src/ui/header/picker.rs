@@ -16,6 +16,7 @@ pub fn build_picker(state: ArcPipe<impl Player>) -> Button {
                 .modal(false)
                 .multiple(false)
                 .filter(FileFilter::new("Videos").mimetype("video/*"))
+                .filter(FileFilter::new("All files").glob("**"))
                 .send()
                 .await
                 .unwrap();

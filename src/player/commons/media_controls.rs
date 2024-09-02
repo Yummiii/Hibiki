@@ -17,5 +17,6 @@ pub trait MediaControls {
     fn volume(&self) -> f64;
 
     fn position(&self) -> Option<u64>;
+    fn seek(&self, position: u64) -> Result<(), ()>;
     fn duration(&self) -> Option<u64>;
 }

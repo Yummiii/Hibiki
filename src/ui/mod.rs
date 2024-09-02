@@ -1,8 +1,4 @@
-use crate::{
-    messenger::{macros::on_message, types::MessageType},
-    player::commons::{media_controls::MediaStates, Player},
-    state::ArcPipe,
-};
+use crate::{player::commons::Player, state::ArcPipe};
 use footer::build_footer;
 use gtk4::{
     prelude::{ApplicationExt, BoxExt, GtkWindowExt, WidgetExt},
@@ -29,14 +25,14 @@ pub fn create_ui(state: ArcPipe<impl Player>) -> Application {
 
         video.set_vexpand(true);
 
-        on_message!(state.messenger, MessageType::StateChanged, MediaStates, {
-            let video = video.clone();
-            move |state| {
-                if *state == MediaStates::Playing && !video.is_visible() {
-                    video.set_visible(true);
-                }
-            }
-        });
+        // on_message!(state.messenger, MessageType::StateChanged, MediaStates, {
+        //     let video = video.clone();
+        //     move |state| {
+        //         if *state == MediaStates::Playing && !video.is_visible() {
+        //             video.set_visible(true);
+        //         }
+        //     }
+        // });
 
         body.append(&video);
         body.set_vexpand(true);

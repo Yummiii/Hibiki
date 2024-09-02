@@ -29,12 +29,19 @@ pub fn build_time_bar(state: ArcPipe<impl Player>) -> Scale {
         move |player_state| {
             if let MediaStates::Playing = *player_state {
                 if let Some(dur) = state.player.duration() {
-                    println!("Duration: {}", dur);
                     duration.set(dur);
                 }
             }
         }
     });
+
+    // on_message!(state.messenger, MessageType::Eos, (), {
+    //     let time_bar = time_bar.clone();
+
+    //     move |_| {
+    //         // time_bar.set_value(0.);
+    //     }
+    // });
 
     time_bar.connect_change_value({
         let state = state.clone();
@@ -42,27 +49,20 @@ pub fn build_time_bar(state: ArcPipe<impl Player>) -> Scale {
         let time_bar = time_bar.clone();
 
         move |_, _, value| {
-            // if pipeline.playbin.current_state() == State::Null {
-            //     return Propagation::Stop;
-            // }
+            if state.player.state() == MediaStates::Stopped {
+                return Propagation::Stop;
+            }
 
-            // pipeline.playbin.set_state(State::Paused).unwrap();
+            let duration = duration.load(Ordering::Relaxed);
+            let width = time_bar.width() as f64;
+            let pos = (value / width) * duration as f64;
 
-            // let duration = duration.load(Ordering::Relaxed);
-            // let width = time_bar.width() as f64;
-            // let pos = (value / width) * duration as f64;
-            // let pos = ClockTime::from_mseconds(pos as u64);
-
-            // //this sometimes freezes the video, but i have no idea why
-            // //also todo: make all the player controls a trait in case i want to switch to a different player
-            // if let Ok(()) = pipeline
-            //     .playbin
-            //     .seek_simple(SeekFlags::TRICKMODE | SeekFlags::FLUSH, pos)
-            // {
-            //     pipeline.playbin.set_state(State::Playing).unwrap();
-            // }
-
-            Propagation::Proceed
+            //this sometimes freezes the video, but i have no idea why
+            if let Ok(()) = state.player.seek(pos as u64) {
+                Propagation::Proceed
+            } else {
+                Propagation::Stop
+            }
         }
     });
 
@@ -73,14 +73,11 @@ pub fn build_time_bar(state: ArcPipe<impl Player>) -> Scale {
         move || {
             let duration = duration.load(Ordering::Relaxed);
             if duration > 0 && state.player.state() == MediaStates::Playing {
-                // println!("{:?}", state.player.state());
-
                 let width = time_bar.width() as f64;
                 time_bar.set_range(0., width);
 
                 if let Some(pos) = state.player.position() {
                     let scale = (width / duration as f64) * pos as f64;
-                    // println!("{}", scale);
                     time_bar.set_value(scale);
                 }
             }
