@@ -14,6 +14,7 @@ impl MediaControls for GStreamerPlayer {
     }
 
     fn play(&self, uri: &str) {
+        self.set_state(MediaStates::Stopped);
         self.load(uri);
         self.set_state(MediaStates::Playing);
     }

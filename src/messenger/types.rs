@@ -2,4 +2,5 @@
 pub enum MessageType {
     StateChanged,
     Eos,
+    SubtitlesFound,
 }
